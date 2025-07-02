@@ -1,103 +1,124 @@
+'use client'
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useStoreActions, useCurrentPage, useHasMore, useIsLoading } from "@/store/hooks";
+import SearchInput from "../components/searchInput";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+const IMAGES_PER_LOAD = 8;
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+export default function Home() {
+  const { setImages, addImages, resetImages, setIsLoading, setHasMore, setCurrentPage } = useStoreActions();
+  const currentPage = useCurrentPage();
+  const hasMore = useHasMore();
+  const isLoading = useIsLoading();
+
+  const [lastSearchQuery, setLastSearchQuery] = useState("");
+  const router = useRouter();
+
+  const loadImages = useCallback(async (page: number, term: string, reset = false) => {
+    if (!term && !lastSearchQuery) {
+      return;
+    }
+
+    const searchTerm = term || lastSearchQuery;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/images?query=${encodeURIComponent(searchTerm)}&page=${page}&per_page=${IMAGES_PER_LOAD}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!Array.isArray(data.images)) {
+        console.error("data.images no es un array:", data.images);
+        setHasMore(false);
+        return;
+      }
+
+      if (data.images.length === 0 && page === 1) {
+        setHasMore(false);
+        if (reset) setImages([]);
+        return;
+      }
+
+      if (reset) {
+        setImages(data.images);
+      } else {
+        addImages(data.images);
+      }
+
+      setHasMore(data.hasMore);
+
+      if (term) setLastSearchQuery(term);
+
+      if (reset || page === 1) {
+        router.push('/search/photos');
+      }
+
+    } catch (error) {
+      console.error("Error loading images:", error);
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router, setImages, addImages, setIsLoading, setHasMore, lastSearchQuery]);
+
+  useEffect(() => {
+    resetImages()
+    setCurrentPage(1)
+    setHasMore(true)
+  }, [resetImages, setCurrentPage, setHasMore]);
+
+  useEffect(() => {
+    const fetchMoreImages = async () => {
+      if (currentPage > 1 && hasMore && !isLoading) {
+        await loadImages(currentPage, lastSearchQuery, false);
+      }
+    };
+
+    fetchMoreImages();
+  }, [currentPage, loadImages, hasMore, isLoading, lastSearchQuery]);
+
+  const handleSearch = async (query: string) => {
+    try {
+      sessionStorage.setItem('lastSearchQuery', query)
+    } catch (error) {
+      console.warn('Could not save to sessionStorage:', error)
+    }
+    setCurrentPage(1)
+    setHasMore(true)
+    await loadImages(1, query, true)
+  }
+
+  return (
+    <main className="h-screen relative overflow-hidden">
+      <Image
+        src='/hero-left.png'
+        alt="hero-image"
+        width={537}
+        height={797}
+        className="absolute object-cover  w-[360px] max-[639px]:-left-[330px] sm:-left-[330px] md:-left-[280px] lg:-left-[150px] xl:left-[0px] h-[70%] top-1/2 -translate-y-1/2 z-0 pointer-events-none select-none"
+      />
+      <Image
+        src='/hero-right.png'
+        alt="hero-image"
+        width={537}
+        height={797}
+        className="absolute object-cover w-[360px]  max-[639px]:-right-[330px] sm:-right-[330px] md:-right-[280px] lg:-right-[150px] xl:right-[0px] h-[70%] top-1/2 -translate-y-1/2 z-0 pointer-events-none select-none"
+      />
+      <div className="flex flex-col items-center justify-center h-full w-full gap-3 relative">
+        <h1 className="text-4xl font-semibold">Search</h1>
+        <h3 className="text-sm">Search high-resolution images from Unsplash</h3>
+        <SearchInput
+          onSearch={handleSearch}
+          isLoading={isLoading}
+        />
+      </div>
+    </main>
   );
 }
