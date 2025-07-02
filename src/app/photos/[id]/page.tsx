@@ -25,7 +25,7 @@ const ImageDetail = () => {
     const handleModal = () => {
         setShow(!show);
     }
-
+    if(!id) return
     const collectionsWithImage = ImageIncluded(collectionsImages, id)
 
     const handleDelete = async (collectionId: string, imageId: string) => {

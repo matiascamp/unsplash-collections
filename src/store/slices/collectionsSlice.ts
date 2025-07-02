@@ -10,7 +10,6 @@ type CollectionsActions = {
     fetchCollections: () => Promise<CollectionsProps[]>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createCollectionsSlice = (set: SetState): CollectionsState & CollectionsActions => ({
     collectionsImages: [],
     

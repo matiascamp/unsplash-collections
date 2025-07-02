@@ -21,7 +21,7 @@ const getGridClasses = (imageCount:number) => {
 };
 
 
-const  UniqueCollection = async ({ params }: { params: { collectionId: string } }) => {
+const  UniqueCollection = async ({ params }: { params: Promise<{ collectionId: string }>}) => {
     
     const { collectionId } = await params;
 

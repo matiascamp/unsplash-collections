@@ -25,7 +25,7 @@ export type Store = StoreState & StoreActions
 
 export type SetState = (
     partial: Store | Partial<Store> | ((state: Store) => Store | Partial<Store>),
-    replace?: boolean | undefined
+    replace?: false | undefined
 ) => void
 
 export type GetState = () => Store 
