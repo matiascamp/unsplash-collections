@@ -2,7 +2,9 @@ import { CollectionsProps } from "@/interfaces/images";
 import CollectionGridClient from '@/components/CollectionGridClient';
 
 const Collections = async () => {
+
     let baseUrl
+
     if (process.env.NODE_ENV === 'production') {
         baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     } else {
@@ -11,7 +13,6 @@ const Collections = async () => {
 
 
     const res = await fetch(`${baseUrl}/api/collections`);
-    console.log("ressponse /api/colecctions", res);
 
 
     if (!res.ok) {
