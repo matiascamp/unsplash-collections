@@ -82,7 +82,6 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value);
     };
-    console.log("path", path);
     
 
     return (

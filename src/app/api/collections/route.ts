@@ -4,10 +4,13 @@ import { connectDb } from "@/utils/mongoose"
 import { NextResponse } from "next/server"
 
 export const GET = async () => {
-    try {
-        connectDb()
-        const result = await CollectionImages.find()
 
+    try {
+        await connectDb()
+        
+        const result = await CollectionImages.find()
+  
+        
         return NextResponse.json({
             result
         },
@@ -15,7 +18,7 @@ export const GET = async () => {
                 status: 200
             })
     } catch (error) {
-        NextResponse.json({
+        return NextResponse.json({
             message: error
         },
             { status: 400 })

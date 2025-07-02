@@ -4,9 +4,11 @@ import CollectionGridClient from '@/components/CollectionGridClient';
 const Collections = async () => {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
+   
+    
     const res = await fetch(`${baseUrl}/api/collections`);
 
+    
     if (!res.ok) {
         return <div>Error to load collections</div>;
     }

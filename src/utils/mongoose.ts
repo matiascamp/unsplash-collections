@@ -17,6 +17,7 @@ export const connectDb = async () => {
     const db = await connect(url)
 
     conn.isConnected = db.connections[0].readyState
+
 }
 
 connection.on('connected', () => {
