@@ -1,6 +1,6 @@
 import { connect, connection } from "mongoose";
 
-const url = 'mongodb+srv://campodonicomatias1:XS7x8e65uQ0walO1@cluster0.cghmlyc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+ const url = process.env.MONGODB_URI
 
 type ConnectionState = {
     isConnected: boolean | number
@@ -13,7 +13,7 @@ const conn: ConnectionState = {
 export const connectDb = async () => {
 
     if (conn.isConnected) return
-
+    if (!url) throw new Error("MONGODB_URL is not defined");
     const db = await connect(url)
 
     conn.isConnected = db.connections[0].readyState

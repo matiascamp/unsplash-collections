@@ -21,7 +21,7 @@ const getGridClasses = (imageCount:number) => {
 };
 
 
-export const  UniqueCollection = async ({ params }: { params: { collectionId: string } }) => {
+const  UniqueCollection = async ({ params }: { params: { collectionId: string } }) => {
     
     const { collectionId } = await params;
 
