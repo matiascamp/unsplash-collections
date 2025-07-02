@@ -7,10 +7,20 @@ export const GET = async () => {
 
     try {
         await connectDb()
-        
+
         const result = await CollectionImages.find()
-  
-        
+
+        console.log("result collection", result);
+
+        if (Object.keys(result).length === 0) {
+            return NextResponse.json({
+                message: "collections not found"
+            },
+                {
+                    status: 404
+                })
+        }
+
         return NextResponse.json({
             result
         },
