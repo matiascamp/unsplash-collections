@@ -6,7 +6,7 @@ const Collections = async () => {
     let baseUrl
 
     if (process.env.NODE_ENV === 'production') {
-        baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+        baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}`
     } else {
         baseUrl = 'http://localhost:3000';
     }
