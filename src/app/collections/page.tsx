@@ -13,7 +13,8 @@ const Collections = async () => {
 
 
     const res = await fetch(`${baseUrl}/api/collections`);
-
+    console.log("res",res);
+    
 
     if (!res.ok) {
         return <div>Error to load collections</div>;
