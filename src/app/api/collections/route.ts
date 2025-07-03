@@ -5,24 +5,11 @@ import { NextResponse } from "next/server"
 
 export const GET = async () => {
     try {
-        console.log('=== API GET Started ===');
-        console.log('Environment check:');
-        console.log('- MONGODB_URI exists:', !!process.env.MONGODB_URI);
-        console.log('- MONGODB_URI length:', process.env.MONGODB_URI?.length || 0);
-        console.log('- NODE_ENV:', process.env.NODE_ENV);
-
-        console.log('Attempting to connect to database...');
         await connectDb();
-        console.log('Database connection successful');
 
-        console.log('Querying CollectionImages...');
         const result = await CollectionImages.find();
-        console.log('Query completed. Results found:', result.length);
-        console.log('First result (if any):', result[0] || 'No results');
 
-        // Cambié la validación porque un array vacío no debería usar Object.keys
         if (result.length === 0) {
-            console.log('No collections found, returning 404');
             return NextResponse.json({
                 message: "collections not found"
             }, {
@@ -30,7 +17,6 @@ export const GET = async () => {
             });
         }
 
-        console.log('Returning successful response with', result.length, 'items');
         return NextResponse.json({
             result
         }, {
